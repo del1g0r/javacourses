@@ -1,4 +1,4 @@
-package structure;
+package com.avramenko.datastructures.list;
 
 public interface List {
 

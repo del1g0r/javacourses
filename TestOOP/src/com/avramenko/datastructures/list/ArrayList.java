@@ -1,4 +1,6 @@
-package structure;
+package com.avramenko.datastructures.list;
+
+import com.avramenko.datastructures.list.List;
 
 public class ArrayList implements List {
 

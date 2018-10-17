@@ -1,6 +1,11 @@
-package structure;
+package com.avramenko.datastructures;
 
-public class Test {
+import com.avramenko.datastructures.queue.ArrayQueue;
+import com.avramenko.datastructures.list.List;
+import com.avramenko.datastructures.list.LinkedList;
+import com.avramenko.datastructures.queue.Queue;
+
+public class TestStruct {
 
     public static void main(String[] args) {
         testList();
@@ -8,7 +13,11 @@ public class Test {
 
     public static void testList() {
 
-        List list = new ArrayList(new Object[]{"A", "B", "c"});
+//        List list = new LinkedList(new Object[]{"A", "B", "c"});
+        List list = new LinkedList();
+        list.add("A");
+        list.add("B");
+        list.add("c");
         System.out.println(list);
 
         list.add("E");
@@ -37,7 +46,7 @@ public class Test {
 
     }
 
-    public static void testQueue() {
+ /*   public static void testQueue() {
         System.out.println("Test queue:");
 
         Queue queue = new ArrayQueue(new Object[]{"A", "B", "C"});
@@ -48,9 +57,9 @@ public class Test {
         System.out.println(obj + " is being enqueued");
         queue.enqueue(obj);
 
-        System.out.println(queue.peek() + " is ready to be enqueued");
+        System.out.println(queue.peek() + " is ready to be dequeued");
         System.out.println(queue);
-        System.out.println(queue.dequeue() + " is enqueued");
+        System.out.println(queue.dequeue() + " is dequeued");
         System.out.println(queue);
-    }
+    }*/
 }
