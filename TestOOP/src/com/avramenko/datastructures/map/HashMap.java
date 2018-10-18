@@ -102,15 +102,6 @@ public class HashMap implements Map, Iterable {
         return size;
     }
 
-    Object get(int index) {
-        int size = 0;
-        for (int i = 0; i < buckets.length; i++) {
-            if (size + buckets[i].size() > index)
-                size += buckets[i].size();
-        }
-        return size;
-    }
-
     @Override
     public boolean containsKey(Object key) {
 
