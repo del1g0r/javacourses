@@ -1,29 +1,31 @@
 package com.avramenko.datastructures.list;
 
-import com.avramenko.datastructures.list.List;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.StringJoiner;
 
-public class ArrayList implements List {
+public class ArrayList implements List, Iterable {
 
     Object[] array;
     int size;
 
-    ArrayList(int initSize) {
+    public ArrayList(int initSize) {
         super();
         array = new Object[initSize];
     }
 
-    ArrayList() {
+    public ArrayList() {
         this(5);
     }
 
-    ArrayList(Object[] array) {
+    public ArrayList(Object[] array) {
         this.array = array;
         size = array.length;
     }
 
     public void add(Object value) {
         if (size == array.length) {
-            Object[] newArray = new Object[array.length * 3 / 2];
+            Object[] newArray = new Object[array.length * 3 / 2 + 1];
             for (int i = 0; i < array.length; i++)
                 newArray[i] = array[i];
             array = newArray;
@@ -39,7 +41,7 @@ public class ArrayList implements List {
         } else if (index < 0 || index > size)
             throw new IndexOutOfBoundsException();
         else {
-            Object[] newArray = size == array.length ? new Object[array.length * 3 / 2] : array;
+            Object[] newArray = size == array.length ? new Object[array.length * 3 / 2 + 1] : array;
             for (int i = size - 1; i >= 0; i--)
                 newArray[i + (index <= i ? 1 : 0)] = array[i];
             array = newArray;
@@ -92,22 +94,93 @@ public class ArrayList implements List {
 
     public int indexOf(Object value) {
         for (int i = 0; i < size; i++)
-            if (array[i].equals(value))
+            if (Objects.equals(array[i], value))
                 return i;
         return -1;
     }
 
     public int lastIndexOf(Object value) {
         for (int i = size - 1; i >= 0; i--)
-            if (array[i].equals(value))
+            if (Objects.equals(array[i], value))
                 return i;
         return -1;
     }
 
     public String toString() {
-        String res = "";
-        for (int i = 0; i < size; i++)
-            res += (i == 0 ? "" : ", ") + array[i].toString();
-        return "[" + res + "]";
+        StringJoiner joiner = new StringJoiner(", ", "[", "]");
+        for (Object value : this) {
+            joiner.add(value.toString());
+        }
+        return joiner.toString();
+    }
+
+    @Override
+    public Iterator iterator() {
+        return new ListIterator();
+    }
+
+    private static class Node {
+
+        Object value;
+        Node prev;
+        Node next;
+
+        public Node(Object value) {
+            this.value = value;
+        }
+    }
+
+    private class ListIterator implements Iterator {
+
+        int cursor = 0;
+
+        @Override
+        public boolean hasNext() {
+            return cursor < size;
+        }
+
+        @Override
+        public Object next() {
+            Object object = array[cursor];
+            cursor++;
+            return object;
+        }
+    }
+
+    public static class Test {
+
+        public static void main(String[] args) {
+
+            List list = new ArrayList();
+            list.add("A");
+            list.add("B");
+            list.add("c");
+            System.out.println(list);
+
+            list.add("E");
+            System.out.println("add(\"E\")");
+            System.out.println(list);
+
+            list.add("D", 3);
+            System.out.println("add(\"D\", 3)");
+            System.out.println(list);
+
+            System.out.println("remove(4)");
+            System.out.println(list.remove(4));
+            System.out.println(list);
+
+            System.out.println("set(\"C\", 2)");
+            System.out.println(list.set("C", 2));
+            System.out.println(list);
+
+            System.out.println("indexOf(\"B\")");
+            System.out.println(list.indexOf("B"));
+            System.out.println(list);
+
+            System.out.println("lastIndexOf(\"Z\")");
+            System.out.println(list.lastIndexOf("Z"));
+            System.out.println(list);
+
+        }
     }
 }

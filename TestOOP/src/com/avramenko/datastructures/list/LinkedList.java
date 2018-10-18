@@ -1,6 +1,10 @@
 package com.avramenko.datastructures.list;
 
-public class LinkedList implements List {
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.StringJoiner;
+
+public class LinkedList implements List, Iterable {
 
     Node head;
     Node tail;
@@ -26,24 +30,28 @@ public class LinkedList implements List {
                 cur.prev.next = newNode;
             cur.prev = newNode;
         }
-        if (newNode.prev == null)
+        if (newNode.prev == null) {
             head = newNode;
-        if (newNode.next == null)
+        }
+        if (newNode.next == null) {
             tail = newNode;
+        }
         size++;
     }
 
     @Override
     public Object remove(int index) {
         Node cur = getNode(index);
-        if (cur.prev != null)
+        if (cur.prev != null) {
             cur.prev.next = cur.next;
-        else
+        } else {
             head = cur.next;
-        if (cur.next != null)
+        }
+        if (cur.next != null) {
             cur.next.prev = cur.prev;
-        else
+        } else {
             tail = cur.prev;
+        }
         size--;
         return cur.value;
     }
@@ -51,18 +59,19 @@ public class LinkedList implements List {
     private Node getNode(int index) {
         if (index < 0 || index >= size)
             throw new IndexOutOfBoundsException();
-        else if (index <= size / 2) {
-            Node cur = head;
-            for (int i = 0; i <= size / 2; i++)
-                if (i == index) return cur;
-                else cur = cur.next;
+        if (index <= size / 2) {
+            Node current = head;
+            for (int i = 0; i < index; i++) {
+                current = current.next;
+            }
+            return current;
         } else {
-            Node cur = tail;
-            for (int i = size - 1; i > size / 2; i--)
-                if (i == index) return cur;
-                else cur = cur.prev;
+            Node current = tail;
+            for (int i = size - 1; i > index; i--) {
+                current = current.prev;
+            }
+            return current;
         }
-        return null;
     }
 
     @Override
@@ -105,8 +114,9 @@ public class LinkedList implements List {
         Node curNode = head;
         int i = 0;
         while (curNode != null) {
-            if (curNode.value.equals(value))
+            if (Objects.equals(curNode.value, value)) {
                 return i;
+            }
             curNode = curNode.next;
             i++;
         }
@@ -118,7 +128,7 @@ public class LinkedList implements List {
         Node curNode = tail;
         int i = size - 1;
         while (curNode != null) {
-            if (curNode.equals(value))
+            if (Objects.equals(curNode.value, value))
                 return i;
             curNode = curNode.prev;
             i--;
@@ -127,17 +137,94 @@ public class LinkedList implements List {
     }
 
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("[");
-        Node curNode = head;
-        while (curNode != null) {
-            if (curNode.prev != null)
-                builder.append(", ");
-            builder.append(curNode.value.toString());
-            curNode = curNode.next;
+        StringJoiner joiner = new StringJoiner(", ", "[", "]");
+        for (Object value : this) {
+            joiner.add(value.toString());
         }
-        builder.append("]");
-        return builder.toString();
+        return joiner.toString();
     }
 
+    @Override
+    public Iterator iterator() {
+        return new ListIterator();
+    }
+
+    private static class Node {
+
+        Object value;
+        Node prev;
+        Node next;
+
+        public Node(Object value) {
+            this.value = value;
+        }
+    }
+
+    private class ListIterator implements Iterator {
+
+        Node cursor = head;
+
+        @Override
+        public boolean hasNext() {
+            return cursor != null;
+        }
+
+        @Override
+        public Object next() {
+            Object value = cursor.value;
+            cursor = cursor.next;
+            return value;
+        }
+    }
+
+    public static void main(String[] args) {
+
+        LinkedList list = new LinkedList();
+        list.add("A");
+        list.add("B");
+        list.add("C");
+
+        for (Object value : list) {
+
+            System.out.println(value);
+
+        }
+    }
+
+    public static class Test {
+
+        public static void main(String[] args) {
+
+            List list = new LinkedList();
+            list.add("A");
+            list.add("B");
+            list.add("c");
+            System.out.println(list);
+
+            list.add("E");
+            System.out.println("add(\"E\")");
+            System.out.println(list);
+
+            list.add("D", 3);
+            System.out.println("add(\"D\", 3)");
+            System.out.println(list);
+
+            System.out.println("remove(4)");
+            System.out.println(list.remove(4));
+            System.out.println(list);
+
+            System.out.println("set(\"C\", 2)");
+            System.out.println(list.set("C", 2));
+            System.out.println(list);
+
+            System.out.println("indexOf(\"B\")");
+            System.out.println(list.indexOf("B"));
+            System.out.println(list);
+
+            System.out.println("lastIndexOf(\"Z\")");
+            System.out.println(list.lastIndexOf("Z"));
+            System.out.println(list);
+
+        }
+    }
 }
