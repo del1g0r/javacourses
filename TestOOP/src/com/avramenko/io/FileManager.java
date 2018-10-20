@@ -89,13 +89,13 @@ public class FileManager {
     }
 
     public static void copyFile(String from, String to) throws IOException {
-        InputStream fromStresm = new FileInputStream(from);
+        InputStream fromStream = new FileInputStream(from);
         OutputStream toStream = new FileOutputStream(to);
         try {
             //System.out.println("COPY " + from + " TO " + to);
-            copyFile(fromStresm, toStream);
+            copyFile(fromStream, toStream);
         } finally {
-            fromStresm.close();
+            fromStream.close();
             toStream.close();
         }
     }
