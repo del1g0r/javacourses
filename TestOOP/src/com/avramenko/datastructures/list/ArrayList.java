@@ -18,6 +18,23 @@ public class ArrayList<T> implements List<T>, Iterable<T> {
         this(0);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Iterable)) {
+            return false;
+        }
+        Iterator iterator = ((Iterable) obj).iterator();
+        for (T value : this) {
+            if (!iterator.hasNext()) {
+                return false;
+            }
+            if (!Objects.equals(value, iterator.next())) {
+                return false;
+            }
+        }
+        return !iterator.hasNext();
+    }
+
     public ArrayList(T[] array) {
         this.array = array;
         size = array.length;

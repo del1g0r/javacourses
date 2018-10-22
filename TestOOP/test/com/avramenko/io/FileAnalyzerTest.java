@@ -1,46 +1,61 @@
 package com.avramenko.io;
 
-import org.junit.After;
-import org.junit.Before;
+import com.avramenko.datastructures.list.ArrayList;
+import com.avramenko.datastructures.list.List;
 import org.junit.Test;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
 
 public class FileAnalyzerTest {
 
-    final String fileName = "c:\\test\\song";
+    final String line = "Twinkle, twinkle, little star,\r\nHow I wonder what you are.\r\nUp above the world so high,\r\nLike a diamond in the sky.\r\nTwinkle, twinkle, little star,\r\nHow I wonder what you are!\r\n";
 
-    @Before
-    public void before() throws FileNotFoundException {
-        PrintWriter writer = new PrintWriter(fileName);
-        writer.println("Twinkle, twinkle, little star,");
-        writer.println("How I wonder what you are.");
-        writer.println("Up above the world so high,");
-        writer.println("Like a diamond in the sky.");
-        writer.println("Twinkle, twinkle, little star,");
-        writer.println("How I wonder what you are!");
-        writer.close();
+    final ArrayList<String> sentences = new ArrayList<>(new String[]{
+            "Twinkle, twinkle, little star,",
+            "How I wonder what you are.",
+            "Up above the world so high,",
+            "Like a diamond in the sky.",
+            "Twinkle, twinkle, little star,",
+            "How I wonder what you are!"
+    });
+
+    final ArrayList<String> filteredSentences = new ArrayList<>(new String[]{
+            "Twinkle, twinkle, little star,",
+            "Twinkle, twinkle, little star,"
+    });
+
+    final String searchyString = "twinkle";
+
+    @Test
+    public void testReadSentences() throws IOException {
+        List<String> actual = FileAnalyzer.readSentences(new ByteArrayInputStream(line.getBytes()));
+        List<String> expected = sentences;
+        assertThat(actual, is(expected));
     }
 
     @Test
-    public void testScanFileCaseSensitive() throws IOException {
-        assertEquals(2, FileAnalyzer.scanFile(fileName,  "twinkle", true));
+    public void testFilter() {
+        List<String> actual = FileAnalyzer.filter(sentences, searchyString, FileAnalyzer.DEFAULT_CASE_SENSITIVE);;
+        List<String> expected = filteredSentences;
+        assertThat(actual, is(expected));
     }
 
     @Test
-    public void testScanFileCaseInsensitive() throws IOException {
-        assertEquals(4, FileAnalyzer.scanFile(fileName,  "twinkle", false));
+    public void testCountOccuranceCaseSensitive() {
+        int count = FileAnalyzer.countOccurance(sentences, searchyString, true);;
+        assertEquals(2, count);
     }
 
-    @After
-    public void after() {
-        new File(fileName).delete();
+    @Test
+    public void testCountOccuranceCaseInsensitive() {
+        int count = FileAnalyzer.countOccurance(sentences, searchyString, false);;
+        assertEquals(4, count);
     }
+
+
 }
 
 
