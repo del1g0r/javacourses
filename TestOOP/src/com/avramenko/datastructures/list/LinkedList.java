@@ -4,26 +4,26 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class LinkedList implements List, Iterable {
+public class LinkedList<T> implements List<T>, Iterable<T> {
 
-    Node head;
-    Node tail;
-    int size;
+    private Node<T> head;
+    private Node<T> tail;
+    private int size;
 
     @Override
-    public void add(Object value) {
+    public void add(T value) {
         add(value, size);
     }
 
     @Override
-    public void add(Object value, int index) {
-        Node newNode = new Node(value);
+    public void add(T value, int index) {
+        Node<T> newNode = new Node<>(value);
         if (index == size) {
             newNode.prev = tail;
             if (tail != null)
                 tail.next = newNode;
         } else {
-            Node cur = getNode(index);
+            Node<T> cur = getNode(index);
             newNode.next = cur;
             newNode.prev = cur.prev;
             if (cur.prev != null)
@@ -40,8 +40,8 @@ public class LinkedList implements List, Iterable {
     }
 
     @Override
-    public Object remove(int index) {
-        Node cur = getNode(index);
+    public T remove(int index) {
+        Node<T> cur = getNode(index);
         if (cur.prev != null) {
             cur.prev.next = cur.next;
         } else {
@@ -56,17 +56,17 @@ public class LinkedList implements List, Iterable {
         return cur.value;
     }
 
-    private Node getNode(int index) {
+    private Node<T> getNode(int index) {
         if (index < 0 || index >= size)
             throw new IndexOutOfBoundsException();
         if (index <= size / 2) {
-            Node current = head;
+            Node<T> current = head;
             for (int i = 0; i < index; i++) {
                 current = current.next;
             }
             return current;
         } else {
-            Node current = tail;
+            Node<T> current = tail;
             for (int i = size - 1; i > index; i--) {
                 current = current.prev;
             }
@@ -75,14 +75,14 @@ public class LinkedList implements List, Iterable {
     }
 
     @Override
-    public Object get(int index) {
+    public T get(int index) {
         return getNode(index).value;
     }
 
     @Override
-    public Object set(Object value, int index) {
-        Node curNode = getNode(index);
-        Object obj = curNode.value;
+    public T set(T value, int index) {
+        Node<T> curNode = getNode(index);
+        T obj = curNode.value;
         curNode.value = value;
         return obj;
     }
@@ -105,13 +105,13 @@ public class LinkedList implements List, Iterable {
     }
 
     @Override
-    public boolean contains(Object value) {
+    public boolean contains(T value) {
         return indexOf(value) != -1;
     }
 
     @Override
-    public int indexOf(Object value) {
-        Node curNode = head;
+    public int indexOf(T value) {
+        Node<T> curNode = head;
         int i = 0;
         while (curNode != null) {
             if (Objects.equals(curNode.value, value)) {
@@ -124,8 +124,8 @@ public class LinkedList implements List, Iterable {
     }
 
     @Override
-    public int lastIndexOf(Object value) {
-        Node curNode = tail;
+    public int lastIndexOf(T value) {
+        Node<T> curNode = tail;
         int i = size - 1;
         while (curNode != null) {
             if (Objects.equals(curNode.value, value))
@@ -145,24 +145,25 @@ public class LinkedList implements List, Iterable {
     }
 
     @Override
-    public Iterator iterator() {
+    @SuppressWarnings("unchecked")
+    public Iterator<T> iterator() {
         return new ListIterator();
     }
 
-    private static class Node {
+    private static class Node<T> {
 
-        Object value;
-        Node prev;
-        Node next;
+        T value;
+        Node<T> prev;
+        Node<T> next;
 
-        public Node(Object value) {
+        Node(T value) {
             this.value = value;
         }
     }
 
     private class ListIterator implements Iterator {
 
-        Node cursor = head;
+        Node<T> cursor = head;
 
         @Override
         public boolean hasNext() {
@@ -170,24 +171,10 @@ public class LinkedList implements List, Iterable {
         }
 
         @Override
-        public Object next() {
-            Object value = cursor.value;
+        public T next() {
+            T value = cursor.value;
             cursor = cursor.next;
             return value;
-        }
-    }
-
-    public static void main(String[] args) {
-
-        LinkedList list = new LinkedList();
-        list.add("A");
-        list.add("B");
-        list.add("C");
-
-        for (Object value : list) {
-
-            System.out.println(value);
-
         }
     }
 
@@ -195,7 +182,7 @@ public class LinkedList implements List, Iterable {
 
         public static void main(String[] args) {
 
-            List list = new LinkedList();
+            List<String> list = new LinkedList<>();
             list.add("A");
             list.add("B");
             list.add("c");

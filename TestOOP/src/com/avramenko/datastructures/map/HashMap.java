@@ -6,58 +6,42 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class HashMap implements Map, Iterable {
+public class HashMap<K, V> implements Map<K, V>, Iterable<HashMap.Entry<K, V>> {
 
-    static private double CLUSTER_FACTOR = 0.5;
-    static private int INCREASE_FACTOR = 2;
-    static private int defaultBucketCount = 3;
+    static final private double CLUSTER_FACTOR = 0.5;
+    static final private int INCREASE_FACTOR = 2;
+    static final private int DEFAULT_BUCKET_COUNT = 10;
 
-    ArrayList[] buckets;
+    private ArrayList<Entry<K, V>>[] buckets;
 
-    HashMap(int bucketCount) {
+    @SuppressWarnings("unchecked")
+    private HashMap(int bucketCount) {
         buckets = new ArrayList[bucketCount];
     }
 
-    HashMap() {
-        this(defaultBucketCount);
+    private HashMap() {
+        this(DEFAULT_BUCKET_COUNT);
     }
 
-    public void putAll(HashMap map) {
-        for (Object object : map) {
-            put(buckets, (Entry) object);
+    public void putAll(HashMap<K, V> map) {
+        for (Entry<K, V> entry : map) {
+            put(entry, true);
         }
     }
 
     @Override
-    public Object put(Object key, Object value) {
-        checkAndGrow();
-        return put(buckets, key, value);
+    public V put(K key, V value) {
+        return put(new Entry<>(key, value), true);
     }
 
     @Override
-    public Object putIfAbsent(Object key, Object value) {
-        checkAndGrow();
-
-        ArrayList bucket = getBucket(key);
-
-        for (Object entryObject : bucket) {
-            Entry entry = (Entry) entryObject;
-            if (Objects.equals(entry.key, key)) {
-                return entry.value;
-            }
-        }
-
-        bucket.add(new Entry(key, value));
-        return null;
+    public V putIfAbsent(K key, V value) {
+        return put(new Entry<>(key, value), false);
     }
 
     @Override
-    public Object get(Object key) {
-
-        ArrayList bucket = getBucket(key);
-
-        for (Object entryObject : bucket) {
-            Entry entry = (Entry) entryObject;
+    public V get(K key) {
+        for (Entry<K, V> entry : getBucket(key)) {
             if (Objects.equals(entry.key, key)) {
                 return entry.value;
             }
@@ -66,19 +50,15 @@ public class HashMap implements Map, Iterable {
     }
 
     @Override
-    public Object remove(Object key) {
-
-        ArrayList bucket = getBucket(key);
-
-        int i = 0;
-        for (Object entryObject : bucket) {
-            Entry entry = (Entry) entryObject;
+    public V remove(K key) {
+        Iterator<Entry<K, V>> iterator = getBucket(key).iterator();
+        while (iterator.hasNext()) {
+            Entry<K, V> entry = iterator.next();
             if (Objects.equals(entry.key, key)) {
-                Object entryValue = entry.value;
-                bucket.remove(i);
+                V entryValue = entry.value;
+                iterator.remove();
                 return entryValue;
             }
-            i++;
         }
         return null;
     }
@@ -86,19 +66,15 @@ public class HashMap implements Map, Iterable {
     @Override
     public int size() {
         int size = 0;
-        for (int i = 0; i < buckets.length; i++) {
-            size += buckets[i] == null ? 0 : buckets[i].size();
+        for (ArrayList<Entry<K, V>> bucket : buckets) {
+            size += bucket == null ? 0 : bucket.size();
         }
         return size;
     }
 
     @Override
-    public boolean containsKey(Object key) {
-
-        ArrayList bucket = getBucket(key);
-
-        for (Object entryObject : bucket) {
-            Entry entry = (Entry) entryObject;
+    public boolean containsKey(K key) {
+        for (Entry<K, V> entry : getBucket(key)) {
             if (Objects.equals(entry.key, key)) {
                 return true;
             }
@@ -108,24 +84,24 @@ public class HashMap implements Map, Iterable {
 
     public String toString() {
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
-        for (Object value : this) {
-            joiner.add(((Entry) value).toString());
+        for (Entry entry : this) {
+            joiner.add(entry.toString());
         }
         return joiner.toString();
     }
 
     @Override
-    public Iterator iterator() {
+    @SuppressWarnings("unchecked")
+    public Iterator<Entry<K, V>> iterator() {
         return new MapIterator();
     }
 
-    private static class Entry {
+    public static class Entry<K, V> {
 
-        Object key;
-        Object value;
+        K key;
+        V value;
 
-        public Entry(Object key, Object value) {
-
+        Entry(K key, V value) {
             this.key = key;
             this.value = value;
         }
@@ -141,55 +117,59 @@ public class HashMap implements Map, Iterable {
         }
     }
 
-    private ArrayList getBucket(ArrayList[] buckets, Object key) {
+    private ArrayList<Entry<K, V>> getBucket(ArrayList<Entry<K, V>>[] buckets, K key) {
         int bucketIndex = (key == null ? 0 : Math.abs(key.hashCode())) % buckets.length;
         if (buckets[bucketIndex] == null) {
-            buckets[bucketIndex] = new ArrayList();
+            buckets[bucketIndex] = new ArrayList<>();
         }
         return buckets[bucketIndex];
     }
 
-    private ArrayList getBucket(Object key) {
+    private ArrayList<Entry<K, V>> getBucket(K key) {
         return getBucket(buckets, key);
     }
 
-    private void put(ArrayList[] buckets, Entry entry) {
-        ArrayList bucket = getBucket(buckets, entry.key);
-        bucket.add(entry);
-    }
-
-    private void checkAndGrow() {
-        if (size() > buckets.length * CLUSTER_FACTOR) {
-            ArrayList[] newBuckets = new ArrayList[buckets.length * INCREASE_FACTOR];
-            //System.out.println("growing to " + newBuckets.length);
-            for (Object entryObj : this) {
-                put(newBuckets, (Entry) entryObj);
-            }
-            buckets = newBuckets;
-        }
-    }
-
-    private Object put(ArrayList[] buckets, Object key, Object value) {
-
-        ArrayList bucket = getBucket(buckets, key);
-
-        for (Object entryObject : bucket) {
-            Entry entry = (Entry) entryObject;
-            if (Objects.equals(entry.key, key)) {
-                Object entryValue = entry.value;
-                entry.value = value;
+    private V put(ArrayList<Entry<K, V>>[] buckets, Entry<K, V> entry, boolean growIfNeeded, boolean replaceIfExists) {
+        ArrayList<Entry<K, V>> bucket = getBucket(buckets, entry.key);
+        for (Entry<K, V> oldEntry : bucket) {
+            if (Objects.equals(oldEntry.key, entry.key)) {
+                V entryValue = oldEntry.value;
+                if (replaceIfExists) {
+                    oldEntry.value = entry.value;
+                }
                 return entryValue;
             }
         }
-
-        bucket.add(new Entry(key, value));
+        if (growIfNeeded) {
+            this.buckets = checkAndGrow(buckets);
+            bucket = getBucket(buckets, entry.key);
+        }
+        bucket.add(entry);
         return null;
+    }
+
+    private V put(Entry<K, V> entry, boolean replaceIfExists) {
+        return put(buckets, entry, true, replaceIfExists);
+    }
+
+    private ArrayList<Entry<K, V>>[] checkAndGrow(ArrayList<Entry<K, V>>[] buckets) {
+        if (size() > buckets.length * CLUSTER_FACTOR) {
+            @SuppressWarnings("unchecked")
+            ArrayList<Entry<K, V>>[] newBuckets = new ArrayList[buckets.length * INCREASE_FACTOR];
+            //System.out.println("growing to " + newBuckets.length);
+            for (Entry<K, V> entry : this) {
+                put(newBuckets, entry, false, true);
+            }
+            return newBuckets;
+        } else {
+            return buckets;
+        }
     }
 
     private class MapIterator implements Iterator {
 
         int indexBucket = -1;
-        Iterator childIterator;
+        Iterator<Entry<K, V>> childIterator;
 
         private int getNextBucket(int index) {
             for (int i = index + 1; i < buckets.length; i++) {
@@ -209,7 +189,7 @@ public class HashMap implements Map, Iterable {
         }
 
         @Override
-        public Object next() {
+        public Entry<K, V> next() {
             return childIterator.next();
         }
 
@@ -223,7 +203,7 @@ public class HashMap implements Map, Iterable {
 
         public static void main(String[] args) {
 
-            Map map = new HashMap();
+            Map<String, String> map = new HashMap<>();
 
             Object value = map.put("user", "john"); // put work as update
 

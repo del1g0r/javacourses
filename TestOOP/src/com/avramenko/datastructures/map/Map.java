@@ -1,18 +1,18 @@
 package com.avramenko.datastructures.map;
 
 
-public interface Map {
+public interface Map<K,V> {
 
-    Object put(Object key, Object value);
+    V put(K key, V value);
 
-    Object putIfAbsent(Object key, Object value);
+    V putIfAbsent(K key, V value);
 
-    Object get(Object key);
+    V get(K key);
 
-    Object remove(Object key);
+    V remove(K key);
 
     int size();
 
-    boolean containsKey(Object key);
+    boolean containsKey(K key);
 }
 

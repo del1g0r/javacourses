@@ -4,44 +4,45 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class ArrayList implements List, Iterable {
+public class ArrayList<T> implements List<T>, Iterable<T> {
 
-    Object[] array;
-    int size;
+    private T[] array;
+    private int size;
 
+    @SuppressWarnings("unchecked")
     public ArrayList(int initSize) {
-        super();
-        array = new Object[initSize];
+        array = (T[]) new Object[initSize];
     }
 
     public ArrayList() {
-        this(5);
+        this(0);
     }
 
-    public ArrayList(Object[] array) {
+    public ArrayList(T[] array) {
         this.array = array;
         size = array.length;
     }
 
-    public void add(Object value) {
+    public void add(T value) {
         if (size == array.length) {
-            Object[] newArray = new Object[array.length * 3 / 2 + 1];
-            for (int i = 0; i < array.length; i++)
-                newArray[i] = array[i];
+            @SuppressWarnings("unchecked")
+            T[] newArray = (T[]) new Object[array.length * 3 / 2 + 1];
+            System.arraycopy(array, 0, newArray, 0, array.length);
             array = newArray;
         }
         array[size] = value;
         size++;
     }
 
-    public void add(Object value, int index) {
+    public void add(T value, int index) {
         if (index == size) {
             // Fast insert
             add(value);
         } else if (index < 0 || index > size)
             throw new IndexOutOfBoundsException();
         else {
-            Object[] newArray = size == array.length ? new Object[array.length * 3 / 2 + 1] : array;
+            @SuppressWarnings("unchecked")
+            T[] newArray = size == array.length ? (T[]) new Object[array.length * 3 / 2 + 1] : array;
             for (int i = size - 1; i >= 0; i--)
                 newArray[i + (index <= i ? 1 : 0)] = array[i];
             array = newArray;
@@ -50,29 +51,30 @@ public class ArrayList implements List, Iterable {
         }
     }
 
-    public Object remove(int index) {
-        Object obj = get(index);
+    public T remove(int index) {
+        T obj = get(index);
         size--;
         for (int i = 0; i < size; i++)
             array[i] = array[i + (index <= i ? 1 : 0)];
         return obj;
     }
 
-    public Object get(int index) {
+    public T get(int index) {
         if (index < 0 || index >= size)
             throw new IndexOutOfBoundsException();
         return array[index];
     }
 
-    public Object set(Object value, int index) {
-        Object obj = get(index);
+    public T set(T value, int index) {
+        T obj = get(index);
         array[index] = value;
         return obj;
     }
 
+    @SuppressWarnings("unchecked")
     public void clear(boolean clearInstance) {
         if (clearInstance)
-            array = new Object[2];
+            array = (T[]) new Object[0];
         size = 0;
     }
 
@@ -88,18 +90,18 @@ public class ArrayList implements List, Iterable {
         return size == 0;
     }
 
-    public boolean contains(Object value) {
+    public boolean contains(T value) {
         return indexOf(value) != -1;
     }
 
-    public int indexOf(Object value) {
+    public int indexOf(T value) {
         for (int i = 0; i < size; i++)
             if (Objects.equals(array[i], value))
                 return i;
         return -1;
     }
 
-    public int lastIndexOf(Object value) {
+    public int lastIndexOf(T value) {
         for (int i = size - 1; i >= 0; i--)
             if (Objects.equals(array[i], value))
                 return i;
@@ -108,42 +110,39 @@ public class ArrayList implements List, Iterable {
 
     public String toString() {
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
-        for (Object value : this) {
+        for (T value : this) {
             joiner.add(value.toString());
         }
         return joiner.toString();
     }
 
     @Override
-    public Iterator iterator() {
+    @SuppressWarnings("unchecked")
+    public Iterator<T> iterator() {
         return new ListIterator();
-    }
-
-    private static class Node {
-
-        Object value;
-        Node prev;
-        Node next;
-
-        public Node(Object value) {
-            this.value = value;
-        }
     }
 
     private class ListIterator implements Iterator {
 
-        int cursor = 0;
+        int index = 0;
 
         @Override
         public boolean hasNext() {
-            return cursor < size;
+            return index < size;
         }
 
         @Override
-        public Object next() {
-            Object object = array[cursor];
-            cursor++;
+        public T next() {
+            T object = array[index];
+            index++;
             return object;
+        }
+
+        @Override
+        public void remove() {
+            size--;
+            for (int i = 0; i < size; i++)
+                array[i] = array[i + (index <= i ? 1 : 0)];
         }
     }
 
@@ -151,7 +150,7 @@ public class ArrayList implements List, Iterable {
 
         public static void main(String[] args) {
 
-            List list = new ArrayList();
+            List<String> list = new ArrayList<>();
             list.add("A");
             list.add("B");
             list.add("c");

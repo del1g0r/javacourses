@@ -1,10 +1,10 @@
 package com.avramenko.datastructures.list;
 
-public interface List {
+public interface List<T> {
 
     // add value to the end of the list
 
-    void add(Object value);
+    void add(T value);
 
 
 
@@ -14,7 +14,7 @@ public interface List {
 
     // [A, B, C] . add("D", [0, 1, 2, 3])
 
-    void add(Object value, int index);
+    void add(T value, int index);
 
 
 
@@ -46,7 +46,7 @@ public interface List {
 
     // otherwise throw new IndexOutOfBoundsException
 
-    Object set(Object value, int index);
+    Object set(T value, int index);
 
 
 
@@ -62,15 +62,15 @@ public interface List {
 
 
 
-    boolean contains(Object value);
+    boolean contains(T value);
 
 
 
-    int indexOf(Object value);
+    int indexOf(T value);
 
 
 
-    int lastIndexOf(Object value);
+    int lastIndexOf(T value);
 
 
 
