@@ -6,6 +6,7 @@ import com.avramenko.datastructures.list.List;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Scanner;
 
 public class FileAnalyzer {
 
@@ -14,7 +15,7 @@ public class FileAnalyzer {
     private static final int BUFFER_SIZE = 1024;
     private static final String EOLN = "\r\n";
 
-    public static List<String> readSentences(InputStream stream) throws IOException {
+/*    public static List<String> readSentences(InputStream stream) throws IOException {
 
         byte[] buffer = new byte[BUFFER_SIZE];
         List<String> list = new ArrayList<>();
@@ -40,6 +41,15 @@ public class FileAnalyzer {
         }
         if (lengthBuffer != offset) {
             list.add(new String(buffer, offset, lengthBuffer - offset));
+        }
+        return list;
+    }*/
+
+    public static List<String> readSentences(InputStream stream) {
+        Scanner scanner = new Scanner(stream);
+        List<String> list = new ArrayList<>();
+        while (scanner.hasNextLine()) {
+            list.add(scanner.nextLine());
         }
         return list;
     }
