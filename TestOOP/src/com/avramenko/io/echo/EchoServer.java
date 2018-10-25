@@ -1,26 +1,22 @@
 package com.avramenko.io.echo;
 
-import com.avramenko.datastructures.list.ArrayList;
-import com.avramenko.datastructures.list.List;
-
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EchoServer {
 
     static private final int DEFAULT_PORT = 3000;
-    static private final int DEFAULT_BUFFER_SIZE = 1024;
     static private final String STOP_WORD = "bye";
 
-    static class Handler implements Runnable {
+    static class HandlerThread extends Thread {
 
-        private byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         private Socket socket;
         private boolean isRunning = true;
 
-        Handler(Socket socket) {
+        HandlerThread(Socket socket) {
             setSocket(socket);
         }
 
@@ -34,36 +30,38 @@ public class EchoServer {
 
         @Override
         public void run() {
+            threads.add(this);
             System.out.println("New connection: " + socket.getRemoteSocketAddress());
-            try {
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            ) {
                 while (isRunning) {
-                    InputStream inputStream = socket.getInputStream();
-                    int count = inputStream.read(buffer);
                     String message;
-                    isRunning = !(message = new String(buffer, 0, count)).toLowerCase().equals(STOP_WORD);
+                    isRunning = !(message = reader.readLine()).toLowerCase().equals(STOP_WORD);
                     System.out.println("Got a message: " + message);
-                    message = "Echo:" + message;
-                    socket.getOutputStream().write(message.getBytes());
+                    writer.write("Echo:" + message + '\n');
+                    writer.flush();
                 }
                 System.out.println("Free connection: " + socket.getRemoteSocketAddress());
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            threads.remove(this);
         }
-    }
 
-    static private List<Thread> threads = new ArrayList<>();
+        static private List<Thread> threads = new ArrayList<>();
 
-    public static void main(String[] args) throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(DEFAULT_PORT)) {
-            while (true) {
-                try {
-                    Socket socket = serverSocket.accept();
-                    Thread thread = new Thread(new Handler(socket));
-                    threads.add(thread);
-                    thread.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        public static void main(String[] args) throws IOException {
+            try (ServerSocket serverSocket = new ServerSocket(DEFAULT_PORT)) {
+                while (true) {
+                    try {
+                        Socket socket = serverSocket.accept();
+                        Thread thread = new HandlerThread(socket);
+                        threads.add(thread);
+                        thread.start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
