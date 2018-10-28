@@ -1,14 +1,17 @@
-package com.avramenko.io.webserver;
+package com.avramenko.io.webserver.entity;
 
 import java.util.Map;
 
 public class Request {
 
     private String uri;
-    private String httpMethod;
+    private HttpMethod httpMethod;
     private Map<String, String> headers;
 
-    public Request(String uri, String httpMethod, Map<String, String> headers) {
+    public Request() {
+    }
+
+    public Request(String uri, HttpMethod httpMethod, Map<String, String> headers) {
         this.uri = uri;
         this.httpMethod = httpMethod;
         this.headers = headers;
@@ -18,8 +21,16 @@ public class Request {
         return uri;
     }
 
-    public String getHttpMethod() {
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public HttpMethod getHttpMethod() {
         return httpMethod;
+    }
+
+    public void setHttpMethod(HttpMethod httpMethod) {
+        this.httpMethod = httpMethod;
     }
 
     @Override

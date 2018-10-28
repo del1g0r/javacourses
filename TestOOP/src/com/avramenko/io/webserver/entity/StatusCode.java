@@ -1,23 +1,24 @@
-package com.avramenko.io.webserver;
+package com.avramenko.io.webserver.entity;
 
-public class Response {
+public enum StatusCode {
 
-    public static final Response SUCCESS = new Response("200", "OK");
-    public static final Response NOT_FOUND = new Response("404", "Not Found");
-    public static final Response BAD_REQUEST = new Response("400", "Bad Request");
-    public static final Response INTERNAL_SERVER_ERROR = new Response("500", "Internal Server Error");
+    SUCCESS("200", "OK"),
+    NOT_FOUND("404", "Not Found"),
+    BAD_REQUEST("400", "Bad Request"),
+    INTERNAL_SERVER_ERROR("500", "Internal Server Error"),
+    METHOD_NOT_ALLOWED("405", "Method Not Allowed");
 
     private String httpProtocol;
     private String statusCode;
     private String reasonLine;
 
-    public Response(String httpProtocol, String statusCode, String reasonLine) {
+    StatusCode(String httpProtocol, String statusCode, String reasonLine) {
         this.httpProtocol = httpProtocol;
         this.statusCode = statusCode;
         this.reasonLine = reasonLine;
     }
 
-    public Response(String statusCode, String reasonLine) {
+    StatusCode(String statusCode, String reasonLine) {
         this("HTTP/1.1", statusCode, reasonLine);
     }
 
